@@ -1,11 +1,10 @@
 import numpy as np
 from moviepy.editor import VideoClip, AudioFileClip, CompositeAudioClip
 from PIL import Image, ImageDraw, ImageFont
-from PIL import Image
-from PIL import Image
 from moviepy.editor import concatenate_audioclips
 from multiprocessing import freeze_support
 from read_data import readScript
+import bisect
 
 
 class Create_movies:
@@ -13,73 +12,60 @@ class Create_movies:
         self.fps = frame
         self.width, self.height = sizex, sizey
         self.title = title
-        self.font = font
+        self.font = ImageFont.truetype(font, 75)
         self.scenes = scenes
+        self.new_height, self.new_width = 1000, 1000
 
-        self.end = False
-        self.first = True
-        self.final_time = 0
-
-        self.new_height = 1000
-        self.new_width = 1000
+        self._phase_mus_processing()
+        self._pic_get()
+        self._sound_processing()
     
-    def phase_mus_prosessing(self):
-        scenes_second = [i.second for i in self.scenes]
-        self.stack_time_lst = []
-        sum = 0
-        for i in scenes_second:
-            sum += i
-            self.stack_time_lst.append(sum)
-        print(len(self.stack_time_lst),self.stack_time_lst)
-        self.final_time = self.stack_time_lst[-1]
+    def _phase_mus_processing(self):
+        self.scene_end_times = np.cumsum([s.second for s in self.scenes])
+        self.final_time = self.scene_end_times[-1]
 
-    def sound_prosessing(self):
+    def _sound_processing(self):
         effect_clips = []
         for i in self.scenes:
             effect_clips.append(AudioFileClip(i.mus).subclip(i.mus_start_point, i.mus_start_point+i.second).volumex(i.mus_vol))
         effect_clips = concatenate_audioclips(effect_clips)
         self.final_audio = CompositeAudioClip([effect_clips])
 
-    def pic_paste(self, path):
-        self.image = Image.open(path).convert("RGBA")
-        self.resized_image = self.image.resize((self.new_width, self.new_height))
-        self.img.paste(self.resized_image, (self.width-self.new_width, 0), self.resized_image)
+    def _pic_get(self):
+        self.pics = []
+        for i in self.scenes:
+            self.image = Image.open(i.pic).convert("RGBA").resize((self.new_width, self.new_height))
+            self.pics.append(self.image)
 
-    def make_frame(self, t):
+    def _pic_paste(self, image):
+        self.img.paste(image, (self.width-self.new_width, 0), image)
+
+    def _make_frame(self, t):
         self.img = Image.new("RGB", (self.width, self.height), "black")
         self.draw = ImageDraw.Draw(self.img)
-        font = ImageFont.truetype(f'{self.font}', 75)
+        scene_index = bisect.bisect_left(self.scene_end_times, t)
+        
+        if scene_index >= len(self.scenes):
+            scene_index = len(self.scenes) - 1
 
-        if t >= self.stack_time_lst[self.now_cut]:
-            self.now_cut += 1
-            if self.stack_time_lst[self.now_cut] == self.final_time:
-                self.end = True  
-                return np.array(self.img)
-
-        self.pic_paste(self.scenes[self.now_cut].pic)
+        self._pic_paste(self.pics[scene_index])
         self.draw.text((210,
                         self.height//2-70), 
-                        phases[self.now_cut].text,
+                        self.scenes[scene_index].text,
                         "#FBFBFB",
-                        font=font,
+                        font=self.font,
                         stroke_width=2,
                         stroke_fill='gray')
 
         return np.array(self.img)
     
-    def final_prossessing(self):
-        self.now_cut = 0
-        clip = VideoClip(self.make_frame, duration=self.final_time)
-        clip = clip.set_audio(self.final_audio)
-        clip.write_videofile(f"./{self.title}.mp4", fps=self.fps)
-
     def run(self):
-        self.phase_mus_prosessing()
-        self.sound_prosessing()
-        self.final_prossessing()
+        clip = VideoClip(self._make_frame, duration=self.final_time)
+        clip = clip.set_audio(self.final_audio)
+        clip.write_videofile(f"./private_file/{self.title}.mp4", fps=self.fps)
 
 
-title, phases = readScript('script copy.json')
+title, scenes = readScript('private_file/script copy.json')
 
 if __name__ == '__main__':
     freeze_support()    
@@ -89,6 +75,6 @@ if __name__ == '__main__':
         frame=5,
         title=title,
         font="fonts/GenEiNuGothic-EB.ttf",
-        scenes=phases
+        scenes=scenes
     )
     movie.run()
