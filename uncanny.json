@@ -1,0 +1,63 @@
+{
+  "Phase1": {
+    "pic": "pic/Phase1Pic.png",
+    "mus": "bgm/Phase1Music.MP3",
+    "mus_start_point": 4,
+    "second": 3
+  },
+  "Phase2": {
+    "pic": "pic/Phase2Pic.png",
+    "mus": "bgm/Phase2Music.MP3",
+    "mus_start_point": 0,
+    "second": 3
+  },
+  "Phase3": {
+    "pic": "pic/Phase3Pic.png",
+    "mus": "bgm/Phase3Music.MP3",
+    "mus_start_point": 8.5,
+    "second": 3.3
+  },
+  "Phase4": {
+    "pic": "pic/Phase4Pic.png",
+    "mus": "bgm/Phase4Music.MP3",
+    "mus_start_point": 0.5,
+    "second": 3.5
+  },
+  "Phase5": {
+    "pic": "pic/Phase5Pic.png",
+    "mus": "bgm/Phase5Music.MP3",
+    "mus_start_point": 1,
+    "second": 4
+  },
+  "Phase6": {
+    "pic": "pic/Phase6Pic.png",
+    "mus": "bgm/Phase6Music.MP3",
+    "mus_start_point": 0,
+    "second": 3
+  },
+  "Phase7": {
+    "pic": "pic/Phase7Pic.png",
+    "mus": "bgm/Phase7Music.MP3",
+    "mus_vol": 0.2,
+    "mus_start_point": 194,
+    "second": 3
+  },
+  "Phase8": {
+    "pic": "pic/Phase8Pic.png",
+    "mus": "bgm/Phase8Music.MP3",
+    "mus_start_point": 0,
+    "second": 7
+  },
+  "Phase9": {
+    "pic": "pic/Phase9Pic.png",
+    "mus": "bgm/Phase9Music.MP3",
+    "mus_start_point": 4,
+    "second": 11
+  },
+  "Phase10": {
+    "pic": "pic/Phase10Pic.png",
+    "mus": "bgm/Phase10Music.MP3",
+    "mus_start_point": 0,
+    "second": 22
+  }
+}
