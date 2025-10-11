@@ -13,12 +13,17 @@ def readScript(file_path):
         phase = data2[value["display"]]
         if 'mus_vol' not in phase.keys():
             phase['mus_vol'] = 1.0
+        if 'heading' not in value.keys():
+            value['heading'] = ''
+        if 'text' not in value.keys():
+            value['text'] = ''
   
         item = Incredible_phases(pic=phase['pic'],
                                  mus=phase['mus'],
                                  mus_start_point=phase['mus_start_point'],
                                  second=phase['second'],
                                  mus_vol=phase['mus_vol'],
-                                 text = value["text"])
+                                 heading = value['heading'],
+                                 text=value['text'])
         result.append(item)
     return data["title"], result

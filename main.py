@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import concatenate_audioclips
 from multiprocessing import freeze_support
 from read_data import readScript
+from text_info import Text_info
 import bisect
 
 
@@ -12,7 +13,8 @@ class Create_movies:
         self.fps = frame
         self.width, self.height = sizex, sizey
         self.title = title
-        self.font = ImageFont.truetype(font, 75)
+        self.header_font = ImageFont.truetype(font, 75)
+        self.text_font = ImageFont.truetype(font, 45)
         self.scenes = scenes
         self.new_height, self.new_width = 1000, 1000
 
@@ -44,18 +46,20 @@ class Create_movies:
         self.img = Image.new("RGB", (self.width, self.height), "black")
         self.draw = ImageDraw.Draw(self.img)
         scene_index = bisect.bisect_left(self.scene_end_times, t)
-        
+        commonX, commonY = (self.width-self.new_width)//2, self.height//2
+        header_content, text_content = self.scenes[scene_index].heading, self.scenes[scene_index].text
+        textY = self.header_font.getbbox(header_content)[3] + commonY
+        content_list = [Text_info(header_content, (commonX, commonY), "#FBFBFB", self.header_font),
+                        Text_info(text_content, (commonX, textY), "#FF9393", self.text_font)]
+
         if scene_index >= len(self.scenes):
             scene_index = len(self.scenes) - 1
 
         self._pic_paste(self.pics[scene_index])
-        self.draw.text((210,
-                        self.height//2-70), 
-                        self.scenes[scene_index].text,
-                        "#FBFBFB",
-                        font=self.font,
-                        stroke_width=2,
-                        stroke_fill='gray')
+
+        for i in content_list:
+            if i.text != '':
+                self.draw.text(i.locate, i.text, i.color, anchor="mm", font=i.font, stroke_width=2, stroke_fill='gray')
 
         return np.array(self.img)
     
