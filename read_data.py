@@ -1,12 +1,13 @@
 import json
 from phases import Incredible_phases
+import time
 
-def readScript(file_path):
+def readScript(file_path, phase_path):
     result = []
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    with open("uncanny.json", 'r', encoding='utf-8') as f:
+    with open(phase_path, 'r', encoding='utf-8') as f:
         data2 = json.load(f)
             
     for value in data["script"]:
@@ -26,4 +27,15 @@ def readScript(file_path):
                                  heading = value['heading'],
                                  text=value['text'])
         result.append(item)
-    return data["title"], result
+    
+    if 'title' not in data.keys():
+        data['title'] = time.time()
+    if 'frame' not in data.keys():
+        data['frame'] = 5
+    if 'font_path' not in data.keys():
+        print('エラー: font_pathが設定されていません。')
+        exit()
+    if 'save_path' not in data.keys():
+        data['save_path'] = '.'
+
+    return data['title'], data['frame'], data['font_path'], data['save_path'], result
