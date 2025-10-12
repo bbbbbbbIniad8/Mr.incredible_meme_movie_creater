@@ -15,6 +15,7 @@ class Read_result_info:
         self.new_height, self.new_width = 900, 900
         self.padding = 10
 
+
 def readScript(file_path, phase_path):
     result = []
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -31,6 +32,8 @@ def readScript(file_path, phase_path):
             value['heading'] = ''
         if 'text' not in value.keys():
             value['text'] = ''
+        if 'pic' not in value.keys():
+            value['pic'] = ''
   
         item = Incredible_phases(pic=phase['pic'],
                                  mus=phase['mus'],
@@ -38,7 +41,8 @@ def readScript(file_path, phase_path):
                                  second=phase['second'],
                                  mus_vol=phase['mus_vol'],
                                  heading = value['heading'],
-                                 text=value['text'])
+                                 text=value['text'],
+                                 sub_pic_path=value['pic'])
         result.append(item)
     
     if 'title' not in data.keys():
@@ -54,6 +58,8 @@ def readScript(file_path, phase_path):
         data['text_font_size'] = 45
     if 'save_path' not in data.keys():
         data['save_path'] = '.'
+    
+    
 
     result2 = Read_result_info(data['title'], data['frame'], data['header_font_path'], data['header_font_size'],
                                data['text_font_path'], data['text_font_size'], data['save_path'], result)
