@@ -1,21 +1,23 @@
+from io import BytesIO
 import numpy as np
 from moviepy.editor import VideoClip, AudioFileClip, CompositeAudioClip
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import concatenate_audioclips
 from multiprocessing import freeze_support
-from read_data import readScript
+from read_data import readScript, Read_result_info
 from text_info import Text_info
 import bisect
 import textwrap
-
+import re
+import requests
 
 class Create_movies:
-    def __init__(self, sizex, sizey, frame, title, font, save_path, scenes):
+    def __init__(self, sizex, sizey, title, frame,  font, font_size, font2, font2_size, save_path, scenes):
         self.fps = frame
         self.width, self.height = sizex, sizey
         self.title = title
-        self.header_font = ImageFont.truetype(font, 55)
-        self.text_font = ImageFont.truetype("fonts/Honoka_Shin_Mincho_L.otf", 45)
+        self.header_font = ImageFont.truetype(font, font_size)
+        self.text_font = ImageFont.truetype(font2, font2_size)
         self.save_path = save_path
         self.scenes = scenes
         self.new_height, self.new_width = 900, 900
@@ -39,7 +41,11 @@ class Create_movies:
     def _pic_get(self):
         self.pics = []
         for i in self.scenes:
-            self.image = Image.open(i.pic).convert("RGBA").resize((self.new_width, self.new_height))
+            if re.search(r"^https:", i.pic) == None:
+                self.image = Image.open(i.pic).convert("RGBA").resize((self.new_width, self.new_height))
+            else:
+                response = requests.get(i.pic)
+                self.image = Image.open(BytesIO(response.content)).convert("RGBA").resize((self.new_width, self.new_height))
             self.pics.append(self.image)
 
     def _pic_paste(self, image):
@@ -76,10 +82,10 @@ class Create_movies:
         clip.write_videofile(self.save_path+f"/{self.title}.mp4", fps=self.fps)
 
 
-title, frame, font_path, save_path, scenes = readScript('./private_file/black.json',
-                                                        'uncanny.json')
+info = readScript('./private_file/black.json', 'uncanny.json')
 
 if __name__ == '__main__':
     freeze_support()    
-    movie = Create_movies(1920, 1080, frame, title, font_path, save_path, scenes)
+    movie = Create_movies(1920, 1080, info.title, info.frame, info.header_font_path, info.header_size,
+                          info.text_font_path, info.text_size, info.save_path, info.scenes)
     movie.run()

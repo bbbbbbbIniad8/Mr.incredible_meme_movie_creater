@@ -2,6 +2,19 @@ import json
 from phases import Incredible_phases
 import time
 
+class Read_result_info:
+    def __init__(self, title, frame, font_path, font_size, font2_path, font2_size, save_path, scenes):
+        self.title = title
+        self.frame = frame
+        self.header_font_path = font_path
+        self.header_size = font_size
+        self.text_font_path = font2_path
+        self.text_size = font2_size
+        self.save_path = save_path
+        self.scenes = scenes
+        self.new_height, self.new_width = 900, 900
+        self.padding = 10
+
 def readScript(file_path, phase_path):
     result = []
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -32,10 +45,17 @@ def readScript(file_path, phase_path):
         data['title'] = time.time()
     if 'frame' not in data.keys():
         data['frame'] = 5
-    if 'font_path' not in data.keys():
+    if 'header_font_path' not in data.keys() or 'text_font_path' not in data.keys():
         print('エラー: font_pathが設定されていません。')
         exit()
+    if 'header_font_size' not in data.keys():
+        data['header_font_size'] = 55
+    if 'text_font_size' not in data.keys():
+        data['text_font_size'] = 45
     if 'save_path' not in data.keys():
         data['save_path'] = '.'
 
-    return data['title'], data['frame'], data['font_path'], data['save_path'], result
+    result2 = Read_result_info(data['title'], data['frame'], data['header_font_path'], data['header_font_size'],
+                               data['text_font_path'], data['text_font_size'], data['save_path'], result)
+
+    return result2

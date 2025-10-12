@@ -1,60 +1,122 @@
 {
-  "Phase1": {
+  "-1": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/e/e7/Phase_3.jpeg/revision/latest?cb=20230830134722",
+    "mus": "bgm/Phase-1Music.MP3",
+    "mus_start_point": 0.2,
+    "second": 4.1
+  },
+  "-2": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/b/b1/Phase_4.png/revision/latest?cb=20230830134830",
+    "mus": "bgm/Phase-2Music.MP3",
+    "mus_start_point": 0,
+    "second": 5
+  },
+  "-3": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/5/50/Phase_5.png/revision/latest?cb=20230830134900",
+    "mus": "bgm/Phase-3Music.MP3",
+    "mus_start_point": 31,
+    "second": 4
+  },
+  "-4": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/5/59/Phase_6.png/revision/latest?cb=20230830135006",
+    "mus": "bgm/Phase-4Music.MP3",
+    "mus_vol": 0.7,
+    "mus_start_point": 1.3,
+    "second": 5
+  },
+  "-5": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/0/05/Phase_7.png/revision/latest?cb=20230830135326",
+    "mus": "bgm/Phase-5Music.MP3",
+    "mus_vol": 0.4,
+    "mus_start_point": 0,
+    "second": 5
+  },
+  "-6": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/b/b2/Phase_8.png/revision/latest?cb=20230830135400",
+    "mus": "bgm/Phase-6Music.MP3",
+    "mus_vol": 0.4,
+    "mus_start_point": 0,
+    "second": 5
+  },
+  "-7": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/4/4a/Phase_9.jpeg/revision/latest?cb=20230830135612",
+    "mus": "bgm/Phase-7Music.MP3",
+    "mus_vol": 0.5,
+    "mus_start_point": 0,
+    "second": 4
+  },
+  "-8": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/f/f5/Phase_-7.png/revision/latest?cb=20230131130532",
+    "mus": "bgm/Phase-8Music.MP3",
+    "mus_vol": 0.25,
+    "mus_start_point": 0,
+    "second": 10
+  },
+
+  "-9": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/b/b5/Phase_-11.jpg/revision/latest?cb=20230830135821",
+    "mus": "bgm/Phase-9Music.MP3",
+    "mus_start_point": 0,
+    "second": 16
+  },
+
+  
+  "1": {
     "pic": "pic/Phase1Pic.png",
     "mus": "bgm/Phase1Music.MP3",
     "mus_start_point": 4,
     "second": 3
   },
-  "Phase2": {
+  "2": {
     "pic": "pic/Phase2Pic.png",
     "mus": "bgm/Phase2Music.MP3",
     "mus_start_point": 0,
     "second": 3
   },
-  "Phase3": {
+  "3": {
     "pic": "pic/Phase3Pic.png",
     "mus": "bgm/Phase3Music.MP3",
     "mus_start_point": 8.5,
     "second": 3.3
   },
-  "Phase4": {
+  "4": {
     "pic": "pic/Phase4Pic.png",
     "mus": "bgm/Phase4Music.MP3",
     "mus_start_point": 0.5,
     "second": 3.5
   },
-  "Phase5": {
+  "5": {
     "pic": "pic/Phase5Pic.png",
     "mus": "bgm/Phase5Music.MP3",
     "mus_start_point": 1,
     "second": 4
   },
-  "Phase6": {
+  "6": {
     "pic": "pic/Phase6Pic.png",
     "mus": "bgm/Phase6Music.MP3",
     "mus_start_point": 0,
     "second": 3
   },
-  "Phase7": {
+  "7": {
     "pic": "pic/Phase7Pic.png",
     "mus": "bgm/Phase7Music.MP3",
     "mus_vol": 0.2,
     "mus_start_point": 194,
     "second": 3
   },
-  "Phase8": {
+  "8": {
     "pic": "pic/Phase8Pic.png",
     "mus": "bgm/Phase8Music.MP3",
     "mus_start_point": 0,
     "second": 7
   },
-  "Phase9": {
+  "9": {
     "pic": "pic/Phase9Pic.png",
     "mus": "bgm/Phase9Music.MP3",
     "mus_start_point": 4,
     "second": 11
   },
-  "Phase10": {
+  "10": {
     "pic": "pic/Phase10Pic.png",
     "mus": "bgm/Phase10Music.MP3",
     "mus_start_point": 0,
