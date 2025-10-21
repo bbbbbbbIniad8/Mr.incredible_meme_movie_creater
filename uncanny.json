@@ -2,15 +2,15 @@
   "-1": {
     "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/e/e7/Phase_3.jpeg/revision/latest?cb=20230830134722",
     "mus": "bgm/Phase-1Music.MP3",
-    "mus_start_point": 0.2,
+    "mus_start_point": 0.4,
     "mus_vol": 0.7,
-    "second": 4.1
+    "second": 3.9
   },
   "-2": {
     "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/b/b1/Phase_4.png/revision/latest?cb=20230830134830",
     "mus": "bgm/Phase-2Music.MP3",
-    "mus_start_point": 0,
-    "second": 5
+    "mus_start_point": 0.2,
+    "second": 4.8
   },
   "-3": {
     "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/5/50/Phase_5.png/revision/latest?cb=20230830134900",

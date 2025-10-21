@@ -62,9 +62,14 @@ class Create_movies:
                     image = Image.open(BytesIO(response.content)).convert("RGBA")
 
                 image_width, image_height = image.size
-                new_height = int(self.display_height*(2/3))
-                new_width = int((new_height / image_height) * image_width)
-                image.resize((new_width, new_height))
+                new_height = int(((self.display_width - self.inc_width) / image_width) * image_height)
+                if image_width > image_height or new_height < int(self.display_height*(2/3)):
+                    new_width = (self.display_width - self.inc_width)
+                else:
+                    new_height = int(self.display_height*(2/3))
+                    new_width = int((new_height / image_height) * image_width)
+                image = image.resize((new_width, new_height))
+
             self.sub_pics.append(image)
 
     def _pic_paste(self, image):
@@ -76,7 +81,7 @@ class Create_movies:
     def _sub_pic_paste(self, image, scene_index):
         if image == None:
             return 
-        pasteX, pasteY = (self.display_width-self.inc_width-image.size[0]) // 2, 0
+        pasteX, pasteY = (self.display_width-self.inc_width-image.size[0]) // 2, int((self.display_height * 2/3 - image.size[1]))
         if self.scenes[scene_index].text =='':
             pasteY = (self.display_height - image.size[1]) // 2
         self.img.paste(image, (pasteX, pasteY), image)
@@ -105,10 +110,10 @@ class Create_movies:
             self.header_font_list.append(best_font or ImageFont.truetype(self.header_font_path, self.header_font_Dsize))
 
     def change_content_list(self, content_list, scene_index, header_font, header_content):
-        sub_sizeY = self.sub_pics[scene_index].size[1]
         if self.sub_pics[scene_index] != None:
+            sub_sizeY = self.sub_pics[scene_index].size[1]
             if self.scenes[scene_index].text != '' :
-                content_list["header"].locate[1] = sub_sizeY
+                content_list["header"].locate[1] = int(self.display_height * 2/3)
             else:
                 content_list["header"].locate[1] = (self.display_height - sub_sizeY) // 2 + sub_sizeY
             content_list["header"].type = "ma"
@@ -148,7 +153,7 @@ class Create_movies:
         clip.write_videofile(self.save_path+f"/{self.title}.mp4", fps=self.fps)
 
 
-info = readScript('./private_file/test.json', 'uncanny.json')
+info = readScript('./private_file/black.json', 'uncanny.json')
 
 if __name__ == '__main__':
     freeze_support()    
