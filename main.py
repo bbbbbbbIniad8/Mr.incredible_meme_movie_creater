@@ -22,17 +22,32 @@ class Create_movies:
         self.save_path = save_path
         self.scenes = scenes
         self.inc_width, self.inc_height = 900, 900
-        # self.sub_width, self.sub_height = 900, 900
         self.padding = 10
+        self._text_message(["WELLCOME TO Mr.incredible Meme Auto Maker"], start_line=True, end_line=True)
+        self._text_message(["START PREPARE"], end_line=True)
 
+        self._text_message(["|First Step: Load Music Files."], start_line=True)
         self._phase_mus_processing()
-        self._pic_get()
         self._sound_processing()
+        self._text_message(["|COMPLATE."], end_line=True)
+
+        self._text_message(["|Second Step: Load picture Files."], start_line=True)
+        self._pic_get()
+        self._text_message(["|COMPLATE."], end_line=True)
         self._adjust_header_content()
+
+    def _text_message(self, message_list, start_line=False, end_line=False):
+        if start_line == True:
+            print("=" * 20)
+        for i in message_list:
+            print(i)
+        if end_line == True:
+            print("=" * 20)
     
-    def _phase_mus_processing(self):
+    def _phase_mus_processing(self): 
         self.scene_end_times = np.cumsum([s.second for s in self.scenes])
         self.final_time = self.scene_end_times[-1]
+        
 
     def _sound_processing(self):
         effect_clips = []
@@ -63,7 +78,7 @@ class Create_movies:
 
                 image_width, image_height = image.size
                 new_height = int(((self.display_width - self.inc_width) / image_width) * image_height)
-                if image_width > image_height or new_height < int(self.display_height*(2/3)):
+                if image_width > image_height and new_height < int(self.display_height*(2/3)):
                     new_width = (self.display_width - self.inc_width)
                 else:
                     new_height = int(self.display_height*(2/3))
@@ -127,7 +142,7 @@ class Create_movies:
         header_font = self.header_font_list[scene_index]
         commonX, header_pasteY = (self.display_width-self.inc_width)//2, self.display_height//2
         header_content = self.scenes[scene_index].heading
-        text_content = "\n".join(textwrap.wrap(self.scenes[scene_index].text, width=17))
+        text_content = "\n".join(textwrap.wrap(self.scenes[scene_index].text, width=20))
         text_pasteY = header_font.getbbox(header_content)[3] // 2 + header_pasteY + self.padding
         
         content_list = {"header": Text_info(header_content, [commonX, header_pasteY], "#FBFBFB", header_font, "mm"),
@@ -148,12 +163,14 @@ class Create_movies:
         return np.array(self.img)
     
     def run(self):
+        self._text_message(["|Finall Step: Create Movie."], start_line=True, end_line=True)
         clip = VideoClip(self._make_frame, duration=self.final_time)
         clip = clip.set_audio(self.final_audio)
         clip.write_videofile(self.save_path+f"/{self.title}.mp4", fps=self.fps)
+        self._text_message(["|END"], start_line=True, end_line=True)
 
 
-info = readScript('./private_file/black.json', 'uncanny.json')
+info = readScript('./private_file/number.json', 'uncanny.json')
 
 if __name__ == '__main__':
     freeze_support()    
