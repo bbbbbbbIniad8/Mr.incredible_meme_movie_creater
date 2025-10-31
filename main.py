@@ -6,7 +6,7 @@ from text_info import Text_info
 import bisect
 import textwrap
 from pathlib import Path
-from sub import _create_canvas, _total_paste ,_pic_get, _adjust_header_content, _text_message
+from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message
 
 class Create_movies:
     def __init__(self, sizex, sizey, title, frame,  font, font_size, font2, font2_size, save_path, scenes):
@@ -88,7 +88,10 @@ class Create_movies:
         
         main_paste_coord = self.display_width-self.inc_width, self.display_height-self.inc_height
         image = sub_pics[scene_index]
-        sub_paste_coord = (self.display_width-self.inc_width-image.size[0]) // 2 ,(int((self.display_height * 2/3 - image.size[1])))
+        if image != None:
+            sub_paste_coord = (self.display_width-self.inc_width-image.size[0]) // 2, (int((self.display_height * 2/3 - image.size[1])))
+        else:
+            sub_paste_coord = 0, 0
         base_img = _total_paste(base_img, draw, self.scenes, scene_index,
                                 inc_pics, sub_pics, content_list, self.display_height, main_paste_coord, sub_paste_coord)
 
@@ -103,7 +106,7 @@ class Create_movies:
         inc_img_size = (self.inc_width, self.inc_height)
         self._prepare(False, True)
         header_font_list = _adjust_header_content(self.scenes, display_size, inc_img_size, self.header_font_path, self.header_font_Dsize)
-        images = [self._create_scene_image(i, header_font_list, self.inc_pics, self.sub_pics) for i in range(len(self.scenes))]
+        images = [self._create_scene_image(i, header_font_list, self.sub_pics, self.inc_pics) for i in range(len(self.scenes))]
 
         for scene_index, image in enumerate(images):
             image.save(self.preview_path / f"scene{scene_index}.png")

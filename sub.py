@@ -15,11 +15,10 @@ def _pic_paste(base_img, image, pasteX, pasteY):
     return base_img
 
 def _sub_pic_paste(base_img, image, scene, display_height, pasteX, pasteY):
-    if image == None:
-        return 
-    if scene.text =='':
-        pasteY = (display_height - image.size[1]) // 2
-    base_img.paste(image, (pasteX, pasteY), image)
+    if image != None:
+        if scene.text =='':
+            pasteY = (display_height - image.size[1]) // 2
+        base_img.paste(image, (pasteX, pasteY), image)
     return base_img
 
 def _total_paste(base_img, draw, scenes, scene_index, inc_pics, sub_pics, content_list, display_height, main_paste_coord, sub_paste_coord):
