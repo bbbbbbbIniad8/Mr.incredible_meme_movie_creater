@@ -58,8 +58,6 @@ def readScript(file_path, phase_path):
         data['text_font_size'] = 45
     if 'save_path' not in data.keys():
         data['save_path'] = '.'
-    
-    
 
     result2 = Read_result_info(data['title'], data['frame'], data['header_font_path'], data['header_font_size'],
                                data['text_font_path'], data['text_font_size'], data['save_path'], result)

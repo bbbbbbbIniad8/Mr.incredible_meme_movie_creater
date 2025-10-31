@@ -1,5 +1,7 @@
 private_file/
+private2/
 __pycache__
 bgm/
 pic/
 venv/
+private.py

@@ -1,15 +1,12 @@
-from io import BytesIO
 import numpy as np
 from moviepy.editor import VideoClip, AudioFileClip, CompositeAudioClip
-from PIL import Image, ImageDraw, ImageFont
+from PIL import ImageFont
 from moviepy.editor import concatenate_audioclips
-from multiprocessing import freeze_support
-from read_data import readScript
 from text_info import Text_info
 import bisect
 import textwrap
-import re
-import requests
+from pathlib import Path
+from sub import _create_canvas, _total_paste ,_pic_get, _adjust_header_content, _text_message
 
 class Create_movies:
     def __init__(self, sizex, sizey, title, frame,  font, font_size, font2, font2_size, save_path, scenes):
@@ -22,32 +19,38 @@ class Create_movies:
         self.save_path = save_path
         self.scenes = scenes
         self.inc_width, self.inc_height = 900, 900
-        self.padding = 10
-        self._text_message(["WELLCOME TO Mr.incredible Meme Auto Maker"], start_line=True, end_line=True)
-        self._text_message(["START PREPARE"], end_line=True)
+        self.padding = 10        
 
-        self._text_message(["|First Step: Load Music Files."], start_line=True)
-        self._phase_mus_processing()
-        self._sound_processing()
-        self._text_message(["|COMPLATE."], end_line=True)
+        self.master_path = Path(save_path) / self.title
+        paths = []
+        for i in ["preview", "movie"]:
+            self.path = Path(save_path) / self.title / i
+            self.path.mkdir(parents=True, exist_ok=True)
+            paths.append(self.path)
+        
+        self.preview_path = paths[0]
+        self.movie_path = paths[1]
 
-        self._text_message(["|Second Step: Load picture Files."], start_line=True)
-        self._pic_get()
-        self._text_message(["|COMPLATE."], end_line=True)
-        self._adjust_header_content()
+    def _prepare(self, text_display, only_image):
+        display_size = (self.display_width, self.display_height)
+        inc_img_size = (self.inc_width, self.inc_height)
+        _text_message(["WELLCOME TO Mr.incredible Meme Auto Maker"], display=text_display, start_line=True, end_line=True)
+        _text_message(["START PREPARE"], display=text_display, end_line=True)
 
-    def _text_message(self, message_list, start_line=False, end_line=False):
-        if start_line == True:
-            print("=" * 20)
-        for i in message_list:
-            print(i)
-        if end_line == True:
-            print("=" * 20)
+        if only_image == False:
+            _text_message(["|First Step: Load Music Files."], display=text_display, start_line=True)
+            self._phase_mus_processing()
+            self._sound_processing()
+            _text_message(["|COMPLATE."], display=text_display, end_line=True)
+
+        _text_message(["|Second Step: Load picture Files."],display=text_display, start_line=True)
+        self.sub_pics, self.inc_pics = _pic_get(self.scenes, display_size, inc_img_size)
+        _text_message(["|COMPLATE."], display=text_display, end_line=True)
+        self.header_font_list = _adjust_header_content(self.scenes, display_size, inc_img_size, self.header_font_path, self.header_font_Dsize)
     
     def _phase_mus_processing(self): 
         self.scene_end_times = np.cumsum([s.second for s in self.scenes])
         self.final_time = self.scene_end_times[-1]
-        
 
     def _sound_processing(self):
         effect_clips = []
@@ -56,77 +59,9 @@ class Create_movies:
         effect_clips = concatenate_audioclips(effect_clips)
         self.final_audio = CompositeAudioClip([effect_clips])
 
-    def _pic_get(self):
-        self.inc_pics = []
-        self.sub_pics = []
-        for i in self.scenes:
-            image = None
-            if re.search(r"^https:", i.pic) == None:
-                image = Image.open(i.pic).convert("RGBA").resize((self.inc_width, self.inc_height))
-            else:
-                response = requests.get(i.pic)
-                image = Image.open(BytesIO(response.content)).convert("RGBA").resize((self.inc_width, self.inc_height))            
-            self.inc_pics.append(image)
-
-            image = None
-            if i.sub_pic != "":
-                if re.search(r"^https:", i.sub_pic) == None:
-                    image = Image.open(i.sub_pic).convert("RGBA")
-                else:
-                    response = requests.get(i.sub_pic)
-                    image = Image.open(BytesIO(response.content)).convert("RGBA")
-
-                image_width, image_height = image.size
-                new_height = int(((self.display_width - self.inc_width) / image_width) * image_height)
-                if image_width > image_height and new_height < int(self.display_height*(2/3)):
-                    new_width = (self.display_width - self.inc_width)
-                else:
-                    new_height = int(self.display_height*(2/3))
-                    new_width = int((new_height / image_height) * image_width)
-                image = image.resize((new_width, new_height))
-
-            self.sub_pics.append(image)
-
-    def _pic_paste(self, image):
-        pasteX, pasteY = self.display_width-self.inc_width, self.display_height-self.inc_height
-        if pasteY != 0:
-            pasteY //=2
-        self.img.paste(image, (pasteX, pasteY), image)
-
-    def _sub_pic_paste(self, image, scene_index):
-        if image == None:
-            return 
-        pasteX, pasteY = (self.display_width-self.inc_width-image.size[0]) // 2, int((self.display_height * 2/3 - image.size[1]))
-        if self.scenes[scene_index].text =='':
-            pasteY = (self.display_height - image.size[1]) // 2
-        self.img.paste(image, (pasteX, pasteY), image)
-
-    def _adjust_header_content(self):
-        self.header_font_list = []
-        for i in self.scenes:
-            header_content = i.heading
-            max_width = self.display_width - self.inc_width
-
-            low = 1
-            high = self.header_font_Dsize
-            best_font = None
-
-            while low <= high:
-                mid = (low + high) // 2
-                font = ImageFont.truetype(self.header_font_path, mid)
-                text_width = font.getbbox(header_content)[2]
-                
-                if text_width <= max_width:
-                    best_font = font
-                    low = mid + 1
-                else:
-                    high = mid - 1
-
-            self.header_font_list.append(best_font or ImageFont.truetype(self.header_font_path, self.header_font_Dsize))
-
-    def change_content_list(self, content_list, scene_index, header_font, header_content):
-        if self.sub_pics[scene_index] != None:
-            sub_sizeY = self.sub_pics[scene_index].size[1]
+    def _change_content_list(self, content_list, scene_index, header_font, header_content, pics):
+        if pics[scene_index] != None:
+            sub_sizeY = pics[scene_index].size[1]
             if self.scenes[scene_index].text != '' :
                 content_list["header"].locate[1] = int(self.display_height * 2/3)
             else:
@@ -134,46 +69,49 @@ class Create_movies:
             content_list["header"].type = "ma"
             content_list["text"].locate[1] = content_list["header"].locate[1] + header_font.getbbox(header_content)[3] + self.padding
 
-
-    def _make_frame(self, t):
-        self.img = Image.new("RGB", (self.display_width, self.display_height), "black")
-        self.draw = ImageDraw.Draw(self.img)
-        scene_index = bisect.bisect_left(self.scene_end_times, t)
-        header_font = self.header_font_list[scene_index]
+    def _create_content_list(self, scene_index, header_content, commonX, header_pasteY, text_pasteY, header_font, text_content, pics):
+        content_list = {"header": Text_info(header_content, [commonX, header_pasteY], "#FBFBFB", header_font, "mm"),
+                        "text": Text_info(text_content, [commonX, text_pasteY], "#FF9393", self.text_font, "ma")}
+        self._change_content_list(content_list, scene_index, header_font, header_content, pics)
+        return content_list
+    
+    def _create_scene_image(self, scene_index, header_font_list, inc_pics, sub_pics):
+        base_img, draw = _create_canvas(self.display_width, self.display_height)
+        header_font = header_font_list[scene_index]
         commonX, header_pasteY = (self.display_width-self.inc_width)//2, self.display_height//2
         header_content = self.scenes[scene_index].heading
         text_content = "\n".join(textwrap.wrap(self.scenes[scene_index].text, width=20))
         text_pasteY = header_font.getbbox(header_content)[3] // 2 + header_pasteY + self.padding
         
-        content_list = {"header": Text_info(header_content, [commonX, header_pasteY], "#FBFBFB", header_font, "mm"),
-                        "text": Text_info(text_content, [commonX, text_pasteY], "#FF9393", self.text_font, "ma")}
+        content_list = self._create_content_list(scene_index, header_content,
+                                                 commonX, header_pasteY, text_pasteY, header_font, text_content, sub_pics)
+        
+        main_paste_coord = self.display_width-self.inc_width, self.display_height-self.inc_height
+        image = sub_pics[scene_index]
+        sub_paste_coord = (self.display_width-self.inc_width-image.size[0]) // 2 ,(int((self.display_height * 2/3 - image.size[1])))
+        base_img = _total_paste(base_img, draw, self.scenes, scene_index,
+                                inc_pics, sub_pics, content_list, self.display_height, main_paste_coord, sub_paste_coord)
 
-        self.change_content_list(content_list, scene_index, header_font, header_content)
+        return base_img
 
-        if scene_index >= len(self.scenes):
-            scene_index = len(self.scenes) - 1
+    def _make_frame(self, t):
+        scene_index = bisect.bisect_left(self.scene_end_times, t)
+        return np.array(self._create_scene_image(scene_index, self.header_font_list, self.sub_pics, self.inc_pics))
 
-        self._pic_paste(self.inc_pics[scene_index])
-        self._sub_pic_paste(self.sub_pics[scene_index], scene_index)
+    def check_scenes(self):
+        display_size = (self.display_width, self.display_height)
+        inc_img_size = (self.inc_width, self.inc_height)
+        self._prepare(False, True)
+        header_font_list = _adjust_header_content(self.scenes, display_size, inc_img_size, self.header_font_path, self.header_font_Dsize)
+        images = [self._create_scene_image(i, header_font_list, self.inc_pics, self.sub_pics) for i in range(len(self.scenes))]
 
-        for i in content_list.values():
-            if i.text != '':
-                self.draw.text(i.locate, i.text, i.color, anchor=i.type, font=i.font, stroke_width=2, stroke_fill='gray')
+        for scene_index, image in enumerate(images):
+            image.save(self.preview_path / f"scene{scene_index}.png")
 
-        return np.array(self.img)
-    
     def run(self):
-        self._text_message(["|Finall Step: Create Movie."], start_line=True, end_line=True)
+        self._prepare(True, False)
+        _text_message(["|Finall Step: Create Movie."], display=True, start_line=True, end_line=True)
         clip = VideoClip(self._make_frame, duration=self.final_time)
         clip = clip.set_audio(self.final_audio)
-        clip.write_videofile(self.save_path+f"/{self.title}.mp4", fps=self.fps)
-        self._text_message(["|END"], start_line=True, end_line=True)
-
-
-info = readScript('./private_file/number.json', 'uncanny.json')
-
-if __name__ == '__main__':
-    freeze_support()    
-    movie = Create_movies(1920, 1080, info.title, info.frame, info.header_font_path, info.header_size,
-                          info.text_font_path, info.text_size, info.save_path, info.scenes)
-    movie.run()
+        clip.write_videofile(str(self.movie_path / f"{self.title}.mp4"), fps=self.fps)
+        _text_message(["|END"], start_line=True, end_line=True)
