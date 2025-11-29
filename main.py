@@ -9,16 +9,21 @@ from pathlib import Path
 from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message
 
 class Create_movies:
-    def __init__(self, sizex, sizey, title, frame,  font, font_size, font2, font2_size, save_path, scenes):
+    def __init__(self, title, frame,  font, font_size, font2, font2_size, save_path, scenes, mode = "nomal"):
         self.fps = frame
-        self.display_width, self.display_height = sizex, sizey
+        if mode == "nomal":
+            self.display_width, self.display_height = 1920, 1080
+            self.inc_width, self.inc_height = 900, 900
+        else:
+            self.display_width, self.display_height = 1080, 1920
+            self.inc_width, self.inc_height = 300, 300
+        self.mode = mode
         self.title = title
         self.header_font_path = font
         self.header_font_Dsize = font_size
         self.text_font = ImageFont.truetype(font2, font2_size)
         self.save_path = save_path
         self.scenes = scenes
-        self.inc_width, self.inc_height = 900, 900
         self.padding = 10        
 
         self.master_path = Path(save_path) / self.title
@@ -30,6 +35,9 @@ class Create_movies:
         
         self.preview_path = paths[0]
         self.movie_path = paths[1]
+        self.base_line_coord = int((self.display_height * 0.4))
+        self.inc_paste_coord = [self.display_width-self.inc_width,
+                                (self.display_height-self.inc_height)//2 if self.mode == "nomal" else self.base_line_coord]
 
     def _prepare(self, text_display, only_image):
         display_size = (self.display_width, self.display_height)
@@ -44,7 +52,7 @@ class Create_movies:
             _text_message(["|COMPLATE."], display=text_display, end_line=True)
 
         _text_message(["|Second Step: Load picture Files."],display=text_display, start_line=True)
-        self.sub_pics, self.inc_pics = _pic_get(self.scenes, display_size, inc_img_size)
+        self.sub_pics, self.inc_pics = _pic_get(self.scenes, display_size, inc_img_size, self.mode)
         _text_message(["|COMPLATE."], display=text_display, end_line=True)
         self.header_font_list = _adjust_header_content(self.scenes, display_size, inc_img_size, self.header_font_path, self.header_font_Dsize)
     
@@ -59,54 +67,71 @@ class Create_movies:
         effect_clips = concatenate_audioclips(effect_clips)
         self.final_audio = CompositeAudioClip([effect_clips])
 
-    def _change_content_list(self, content_list, scene_index, header_font, header_content, pics):
-        if pics[scene_index] != None:
-            sub_sizeY = pics[scene_index].size[1]
-            if self.scenes[scene_index].text != '' :
-                content_list["header"].locate[1] = int(self.display_height * 2/3)
+    def _change_content_list(self, content_list, scene, header_font, header_content, sub_pic):
+        if self.mode == "nomal":
+            if sub_pic != None:
+                sub_sizeY = sub_pic.size[1]
+                if scene.text != '' :
+                    content_list["header"].locate[1] = int(self.display_height * 2/3)
+                else:
+                    content_list["header"].locate[1] = (self.display_height - sub_sizeY) // 2 + sub_sizeY
+                content_list["header"].type = "ma"
             else:
-                content_list["header"].locate[1] = (self.display_height - sub_sizeY) // 2 + sub_sizeY
-            content_list["header"].type = "ma"
-            content_list["text"].locate[1] = content_list["header"].locate[1] + header_font.getbbox(header_content)[3] + self.padding
+                content_list["header"].locate[1] = self.display_height // 2
+        else:
+            content_list["header"].locate[1] =  self.base_line_coord + self.inc_height + self.padding*5
+        
+        content_list["text"].locate[1] = content_list["header"].locate[1] + header_font.getbbox(header_content)[3] + self.padding
+
+        return content_list
 
     def _create_content_list(self, scene_index, header_content, commonX, header_pasteY, text_pasteY, header_font, text_content, pics):
         content_list = {"header": Text_info(header_content, [commonX, header_pasteY], "#FBFBFB", header_font, "mm"),
                         "text": Text_info(text_content, [commonX, text_pasteY], "#FF9393", self.text_font, "ma")}
-        self._change_content_list(content_list, scene_index, header_font, header_content, pics)
+        content_list = self._change_content_list(content_list, scene_index, header_font, header_content, pics)
         return content_list
     
-    def _create_scene_image(self, scene_index, header_font_list, inc_pics, sub_pics):
+    def _create_scene_image(self, scene, header_font_list, pics):
         base_img, draw = _create_canvas(self.display_width, self.display_height)
-        header_font = header_font_list[scene_index]
-        commonX, header_pasteY = (self.display_width-self.inc_width)//2, self.display_height//2
-        header_content = self.scenes[scene_index].heading
-        text_content = "\n".join(textwrap.wrap(self.scenes[scene_index].text, width=20))
-        text_pasteY = header_font.getbbox(header_content)[3] // 2 + header_pasteY + self.padding
+        header_font = header_font_list
         
-        content_list = self._create_content_list(scene_index, header_content,
-                                                 commonX, header_pasteY, text_pasteY, header_font, text_content, sub_pics)
-        
-        main_paste_coord = self.display_width-self.inc_width, self.display_height-self.inc_height
-        image = sub_pics[scene_index]
+        header_content = scene.heading
+        text_content = "\n".join(textwrap.wrap(scene.text, width=20))
+
+        commonX = (self.display_width-self.inc_width)//2 if self.mode == "nomal" else self.display_width//2
+
+        image = pics["sub"]
+        sub_paste_coord = [0, 0]
         if image != None:
-            sub_paste_coord = (self.display_width-self.inc_width-image.size[0]) // 2, (int((self.display_height * 2/3 - image.size[1])))
-        else:
-            sub_paste_coord = 0, 0
-        base_img = _total_paste(base_img, draw, self.scenes, scene_index,
-                                inc_pics, sub_pics, content_list, self.display_height, main_paste_coord, sub_paste_coord)
+            X = (self.display_width-self.inc_width-image.size[0]) 
+            Y = int((self.display_height * 2/3 - image.size[1])) if self.mode == "nomal" else int((self.base_line_coord * 2 - image.size[1]))
+            sub_paste_coord = [X//2, Y//2]
+
+        content_list = self._create_content_list(scene, header_content,
+                                                 commonX, 0, 0, header_font, text_content, pics["sub"])
+        
+        base_img = _total_paste(base_img, draw, scene,
+                                pics, content_list, self.display_height, self.inc_paste_coord, sub_paste_coord)
 
         return base_img
 
     def _make_frame(self, t):
         scene_index = bisect.bisect_left(self.scene_end_times, t)
-        return np.array(self._create_scene_image(scene_index, self.header_font_list, self.sub_pics, self.inc_pics))
+        return np.array(self._create_scene_image(self.scenes[scene_index],
+                                                 self.header_font_list[scene_index],
+                                                 {"inc": self.sub_pics[scene_index], 
+                                                  "sub": self.inc_pics[scene_index]}
+                                                ))
 
     def check_scenes(self):
         display_size = (self.display_width, self.display_height)
         inc_img_size = (self.inc_width, self.inc_height)
         self._prepare(False, True)
         header_font_list = _adjust_header_content(self.scenes, display_size, inc_img_size, self.header_font_path, self.header_font_Dsize)
-        images = [self._create_scene_image(i, header_font_list, self.sub_pics, self.inc_pics) for i in range(len(self.scenes))]
+        images = [self._create_scene_image(v,
+                                           header_font_list[i], 
+                                           {"inc": self.sub_pics[i], 
+                                            "sub": self.inc_pics[i]}) for i, v in enumerate(self.scenes)]
 
         for scene_index, image in enumerate(images):
             image.save(self.preview_path / f"scene{scene_index}.png")

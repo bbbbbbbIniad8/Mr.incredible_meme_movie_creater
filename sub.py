@@ -9,8 +9,6 @@ def _create_canvas(display_width, display_height):
     return img, draw
 
 def _pic_paste(base_img, image, pasteX, pasteY):
-    if pasteY != 0:
-        pasteY //=2
     base_img.paste(image, (pasteX, pasteY), image)
     return base_img
 
@@ -21,18 +19,19 @@ def _sub_pic_paste(base_img, image, scene, display_height, pasteX, pasteY):
         base_img.paste(image, (pasteX, pasteY), image)
     return base_img
 
-def _total_paste(base_img, draw, scenes, scene_index, inc_pics, sub_pics, content_list, display_height, main_paste_coord, sub_paste_coord):
+def _total_paste(base_img, draw, scenes_info, pics, content_list, display_height, main_paste_coord, sub_paste_coord):
     pasteX, pasteY = main_paste_coord
-    base_img = _pic_paste(base_img, inc_pics[scene_index], pasteX, pasteY)
-    image = sub_pics[scene_index]
-    pasteX, pasteY = sub_paste_coord 
-    base_img = _sub_pic_paste(base_img, image, scenes[scene_index], display_height, pasteX, pasteY)
+    base_img = _pic_paste(base_img, pics["inc"], pasteX, pasteY)
+    image = pics["sub"]
+
+    pasteX, pasteY = sub_paste_coord
+    base_img = _sub_pic_paste(base_img, image, scenes_info, display_height, pasteX, pasteY)
     for i in content_list.values():
         if i.text != '':
             draw.text(i.locate, i.text, i.color, anchor=i.type, font=i.font, stroke_width=2, stroke_fill='gray')
     return base_img
 
-def _pic_get(scenes, display_size, inc_img_size):
+def _pic_get(scenes, display_size, inc_img_size, mode):
     inc_pics = []
     sub_pics = []
     for i in scenes:
@@ -56,14 +55,20 @@ def _pic_get(scenes, display_size, inc_img_size):
                     print(f"エラー: {i.sub_pic}")
                     exit()
 
+            ## 要分離
             image_width, image_height = image.size
             inc_width = inc_img_size[0]
             display_width, display_height = display_size
             new_height = int(((display_width - inc_width) / image_width) * image_height)
-            if image_width > image_height and new_height < int(display_height*(2/3)):
+            if mode == "nomal":
+                height_max = 2/3
+            else:
+                height_max = 1/3
+
+            if image_width > image_height and new_height < int(display_height*(height_max)):
                 new_width = (display_width - inc_width)
             else:
-                new_height = int(display_height*(2/3))
+                new_height = int(display_height*(height_max))
                 new_width = int((new_height / image_height) * image_width)
             image = image.resize((new_width, new_height))
 

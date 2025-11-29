@@ -53,12 +53,25 @@
     "mus_start_point": 0,
     "second": 10
   },
+  "-8-short": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/f/f5/Phase_-7.png/revision/latest?cb=20230131130532",
+    "mus": "bgm/Phase-8Music.MP3",
+    "mus_vol": 0.25,
+    "mus_start_point": 0,
+    "second": 4
+  },
 
   "-9": {
     "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/b/b5/Phase_-11.jpg/revision/latest?cb=20230830135821",
     "mus": "bgm/Phase-9Music.MP3",
     "mus_start_point": 0,
     "second": 16
+  },
+  "-9-short": {
+    "pic": "https://static.wikia.nocookie.net/the-canny-incredible/images/b/b5/Phase_-11.jpg/revision/latest?cb=20230830135821",
+    "mus": "bgm/Phase-9Music.MP3",
+    "mus_start_point": 0,
+    "second": 4
   },
 
   
@@ -73,6 +86,12 @@
     "mus": "bgm/Phase2Music.MP3",
     "mus_start_point": 0,
     "second": 3
+  },
+  "2.5":{
+    "pic": "https://static.wikia.nocookie.net/the-uncanny-incredible/images/e/e6/Phase_2.5%27s_apperance.jpg/revision/latest?cb=20240730174940",
+    "mus": "bgm/Phase2.5Music.MP3",
+    "mus_start_point": 0,
+    "second": 4
   },
   "3": {
     "pic": "pic/Phase3Pic.png",
