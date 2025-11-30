@@ -14,18 +14,19 @@ def _pic_paste(base_img, image, pasteX, pasteY):
 
 def _sub_pic_paste(base_img, image, scene, display_height, pasteX, pasteY):
     if image != None:
-        if scene.text =='':
-            pasteY = (display_height - image.size[1]) // 2
         base_img.paste(image, (pasteX, pasteY), image)
     return base_img
 
-def _total_paste(base_img, draw, scenes_info, pics, content_list, display_height, main_paste_coord, sub_paste_coord):
+def _total_paste(base_img, draw, scenes_info, pics, content_list, display_height, main_paste_coord, sub_paste_coord, poptitle_info):
+    if poptitle_info != None:
+        item = poptitle_info
+        draw.text(item.locate, item.text, item.color, anchor=item.type, font=item.font, stroke_width=2, stroke_fill='gray')
+
     pasteX, pasteY = main_paste_coord
-    base_img = _pic_paste(base_img, pics["inc"], pasteX, pasteY)
-    image = pics["sub"]
+    base_img = _pic_paste(base_img, pics["inc"], pasteX, pasteY) 
 
     pasteX, pasteY = sub_paste_coord
-    base_img = _sub_pic_paste(base_img, image, scenes_info, display_height, pasteX, pasteY)
+    base_img = _sub_pic_paste(base_img, pics["sub"], scenes_info, display_height, pasteX, pasteY)
     for i in content_list.values():
         if i.text != '':
             draw.text(i.locate, i.text, i.color, anchor=i.type, font=i.font, stroke_width=2, stroke_fill='gray')
@@ -84,23 +85,27 @@ def _adjust_header_content(scenes, display_size, inc_img_size, header_font_path,
         header_content = i.heading
         max_width = display_width - inc_width
 
-        low = 1
-        high = header_font_Dsize
-        best_font = None
-
-        while low <= high:
-            mid = (low + high) // 2
-            font = ImageFont.truetype(header_font_path, mid)
-            text_width = font.getbbox(header_content)[2]
-            
-            if text_width <= max_width:
-                best_font = font
-                low = mid + 1
-            else:
-                high = mid - 1
+        best_font = _decide_best_font(header_content, max_width, header_font_path, header_font_Dsize)
 
         header_font_list.append(best_font or ImageFont.truetype(header_font_path, header_font_Dsize))
     return header_font_list
+
+def _decide_best_font(content, max_width, font_path, font_max_size):
+    low = 1
+    high = font_max_size
+    best_font = None
+
+    while low <= high:
+        mid = (low + high) // 2
+        font = ImageFont.truetype(font_path, mid)
+        text_width = font.getbbox(content)[2]
+        
+        if text_width <= max_width:
+            best_font = font
+            low = mid + 1
+        else:
+            high = mid - 1
+    return best_font
 
 def _text_message(message_list, start_line=False, end_line=False, display=True):
     if display == False:

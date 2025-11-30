@@ -6,7 +6,7 @@ from text_info import Text_info
 import bisect
 import textwrap
 from pathlib import Path
-from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message
+from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message, _decide_best_font
 
 class Create_movies:
     def __init__(self, title, frame,  font, font_size, font2, font2_size, save_path, scenes, mode = "nomal"):
@@ -24,20 +24,22 @@ class Create_movies:
         self.text_font = ImageFont.truetype(font2, font2_size)
         self.save_path = save_path
         self.scenes = scenes
+        if self.mode == "short":
+            self._short_processing()
         self.padding = 10        
 
         self.master_path = Path(save_path) / self.title
         paths = []
         for i in ["preview", "movie"]:
-            self.path = Path(save_path) / self.title / i
+            self.path = Path(save_path) / (self.title + "-" + self.mode) / i
             self.path.mkdir(parents=True, exist_ok=True)
             paths.append(self.path)
         
         self.preview_path = paths[0]
         self.movie_path = paths[1]
-        self.base_line_coord = int((self.display_height * 0.4))
+        self.base_line_coord = int((self.display_height * 0.6))
         self.inc_paste_coord = [self.display_width-self.inc_width,
-                                (self.display_height-self.inc_height)//2 if self.mode == "nomal" else self.base_line_coord]
+                                (self.display_height-self.inc_height)//2 if self.mode == "nomal" else self.base_line_coord - (self.inc_height)]
 
     def _prepare(self, text_display, only_image):
         display_size = (self.display_width, self.display_height)
@@ -67,6 +69,14 @@ class Create_movies:
         effect_clips = concatenate_audioclips(effect_clips)
         self.final_audio = CompositeAudioClip([effect_clips])
 
+    def _short_processing(self):
+        max_width = self.display_width
+        font_path = self.header_font_path
+        font_max_size = 200
+        font = _decide_best_font(self.scenes[0].heading, max_width, font_path, font_max_size)
+        self.poptitle_info = Text_info(self.scenes[0].heading, (max_width//2, 100), "white", font, "ma")
+        self.scenes = self.scenes[1:]
+
     def _change_content_list(self, content_list, scene, header_font, header_content, sub_pic):
         if self.mode == "nomal":
             if sub_pic != None:
@@ -79,7 +89,7 @@ class Create_movies:
             else:
                 content_list["header"].locate[1] = self.display_height // 2
         else:
-            content_list["header"].locate[1] =  self.base_line_coord + self.inc_height + self.padding*5
+            content_list["header"].locate[1] =  self.base_line_coord + self.padding*5
         
         content_list["text"].locate[1] = content_list["header"].locate[1] + header_font.getbbox(header_content)[3] + self.padding
 
@@ -100,18 +110,22 @@ class Create_movies:
 
         commonX = (self.display_width-self.inc_width)//2 if self.mode == "nomal" else self.display_width//2
 
-        image = pics["sub"]
         sub_paste_coord = [0, 0]
-        if image != None:
-            X = (self.display_width-self.inc_width-image.size[0]) 
-            Y = int((self.display_height * 2/3 - image.size[1])) if self.mode == "nomal" else int((self.base_line_coord * 2 - image.size[1]))
-            sub_paste_coord = [X//2, Y//2]
+        if pics["sub"] != None:
+            X = (self.display_width-self.inc_width-pics["sub"].size[0]) 
+            Y = int((self.display_height * 2/3 - pics["sub"].size[1])//2) if self.mode == "nomal" else int((self.base_line_coord - pics["sub"].size[1]))
+            if scene.text =='' and self.mode == "nomal":
+                Y = (self.display_height - pics["sub"].size[1])//2
+            sub_paste_coord = [X//2, Y]
 
         content_list = self._create_content_list(scene, header_content,
                                                  commonX, 0, 0, header_font, text_content, pics["sub"])
         
+        poptitle_info = self.poptitle_info if self.mode == "short" else None
+        
         base_img = _total_paste(base_img, draw, scene,
-                                pics, content_list, self.display_height, self.inc_paste_coord, sub_paste_coord)
+                                pics, content_list, self.display_height, self.inc_paste_coord, sub_paste_coord,
+                                poptitle_info)
 
         return base_img
 

@@ -34,6 +34,8 @@ def readScript(file_path, phase_path):
             value['text'] = ''
         if 'pic' not in value.keys():
             value['pic'] = ''
+        if 'type' not in value.keys():
+            value['type'] = ''
   
         item = Incredible_phases(pic=phase['pic'],
                                  mus=phase['mus'],
