@@ -6,7 +6,7 @@ from text_info import Text_info
 import bisect
 import textwrap
 from pathlib import Path
-from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message, _decide_best_font
+from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message, _decide_best_font, _create_content_list, _decide_sub_paste_coord
 
 class Create_movies:
     def __init__(self, title, frame,  font, font_size, font2, font2_size, save_path, scenes, mode = "nomal"):
@@ -37,7 +37,7 @@ class Create_movies:
         
         self.preview_path = paths[0]
         self.movie_path = paths[1]
-        self.base_line_coord = int((self.display_height * 0.6))
+        self.base_line_coord = int((self.display_height * 0.5))
         self.inc_paste_coord = [self.display_width-self.inc_width,
                                 (self.display_height-self.inc_height)//2 if self.mode == "nomal" else self.base_line_coord - (self.inc_height)]
 
@@ -74,57 +74,23 @@ class Create_movies:
         font_path = self.header_font_path
         font_max_size = 200
         font = _decide_best_font(self.scenes[0].heading, max_width, font_path, font_max_size)
-        self.poptitle_info = Text_info(self.scenes[0].heading, (max_width//2, 100), "white", font, "ma")
+        self.poptitle_info = Text_info(self.scenes[0].heading, (max_width//2, 150), "white", font, "ma")
         self.scenes = self.scenes[1:]
-
-    def _change_content_list(self, content_list, scene, header_font, header_content, sub_pic):
-        if self.mode == "nomal":
-            if sub_pic != None:
-                sub_sizeY = sub_pic.size[1]
-                if scene.text != '' :
-                    content_list["header"].locate[1] = int(self.display_height * 2/3)
-                else:
-                    content_list["header"].locate[1] = (self.display_height - sub_sizeY) // 2 + sub_sizeY
-                content_list["header"].type = "ma"
-            else:
-                content_list["header"].locate[1] = self.display_height // 2
-        else:
-            content_list["header"].locate[1] =  self.base_line_coord + self.padding*5
-        
-        content_list["text"].locate[1] = content_list["header"].locate[1] + header_font.getbbox(header_content)[3] + self.padding
-
-        return content_list
-
-    def _create_content_list(self, scene_index, header_content, commonX, header_pasteY, text_pasteY, header_font, text_content, pics):
-        content_list = {"header": Text_info(header_content, [commonX, header_pasteY], "#FBFBFB", header_font, "mm"),
-                        "text": Text_info(text_content, [commonX, text_pasteY], "#FF9393", self.text_font, "ma")}
-        content_list = self._change_content_list(content_list, scene_index, header_font, header_content, pics)
-        return content_list
     
     def _create_scene_image(self, scene, header_font_list, pics):
         base_img, draw = _create_canvas(self.display_width, self.display_height)
         header_font = header_font_list
-        
         header_content = scene.heading
         text_content = "\n".join(textwrap.wrap(scene.text, width=20))
-
         commonX = (self.display_width-self.inc_width)//2 if self.mode == "nomal" else self.display_width//2
-
-        sub_paste_coord = [0, 0]
-        if pics["sub"] != None:
-            X = (self.display_width-self.inc_width-pics["sub"].size[0]) 
-            Y = int((self.display_height * 2/3 - pics["sub"].size[1])//2) if self.mode == "nomal" else int((self.base_line_coord - pics["sub"].size[1]))
-            if scene.text =='' and self.mode == "nomal":
-                Y = (self.display_height - pics["sub"].size[1])//2
-            sub_paste_coord = [X//2, Y]
-
-        content_list = self._create_content_list(scene, header_content,
-                                                 commonX, 0, 0, header_font, text_content, pics["sub"])
-        
+        sub_paste_coord = _decide_sub_paste_coord(pics, self.display_width, self.display_height, 
+                                                  self.base_line_coord, self.inc_width, scene.text, self.mode)
+        content_list = _create_content_list(scene, header_content,
+                                            commonX, 0, 0, header_font, self.text_font, text_content, pics["sub"],
+                                            self.display_height, self.base_line_coord, self.padding, self.mode)
         poptitle_info = self.poptitle_info if self.mode == "short" else None
-        
-        base_img = _total_paste(base_img, draw, scene,
-                                pics, content_list, self.display_height, self.inc_paste_coord, sub_paste_coord,
+        base_img = _total_paste(base_img, draw,
+                                pics, content_list, self.inc_paste_coord, sub_paste_coord,
                                 poptitle_info)
 
         return base_img
@@ -134,8 +100,7 @@ class Create_movies:
         return np.array(self._create_scene_image(self.scenes[scene_index],
                                                  self.header_font_list[scene_index],
                                                  {"inc": self.sub_pics[scene_index], 
-                                                  "sub": self.inc_pics[scene_index]}
-                                                ))
+                                                  "sub": self.inc_pics[scene_index]}))
 
     def check_scenes(self):
         display_size = (self.display_width, self.display_height)
