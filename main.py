@@ -9,9 +9,9 @@ from pathlib import Path
 from sub import _create_canvas, _total_paste, _pic_get, _adjust_header_content, _text_message, _decide_best_font, _create_content_list, _decide_sub_paste_coord
 
 class Create_movies:
-    def __init__(self, title, frame,  font, font_size, font2, font2_size, save_path, scenes, mode = "nomal"):
+    def __init__(self, title, frame,  font, font_size, font2, font2_size, save_path, scenes, mode = "nomral"):
         self.fps = frame
-        if mode == "nomal":
+        if mode == "normal":
             self.display_width, self.display_height = 1920, 1080
             self.inc_width, self.inc_height = 900, 900
         else:
@@ -39,7 +39,7 @@ class Create_movies:
         self.movie_path = paths[1]
         self.base_line_coord = int((self.display_height * 0.5))
         self.inc_paste_coord = [self.display_width-self.inc_width,
-                                (self.display_height-self.inc_height)//2 if self.mode == "nomal" else self.base_line_coord - (self.inc_height)]
+                                (self.display_height-self.inc_height)//2 if self.mode == "normal" else self.base_line_coord - (self.inc_height)]
 
     def _prepare(self, text_display, only_image):
         display_size = (self.display_width, self.display_height)
@@ -82,7 +82,7 @@ class Create_movies:
         header_font = header_font_list
         header_content = scene.heading
         text_content = "\n".join(textwrap.wrap(scene.text, width=20))
-        commonX = (self.display_width-self.inc_width)//2 if self.mode == "nomal" else self.display_width//2
+        commonX = (self.display_width-self.inc_width)//2 if self.mode == "normal" else self.display_width//2
         sub_paste_coord = _decide_sub_paste_coord(pics, self.display_width, self.display_height, 
                                                   self.base_line_coord, self.inc_width, scene.text, self.mode)
         content_list = _create_content_list(scene, header_content,

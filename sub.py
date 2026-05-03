@@ -72,7 +72,7 @@ def _resize_pic(image, inc_img_size, display_size, mode):
     inc_width = inc_img_size[0]
     display_width, display_height = display_size
     new_height = int(((display_width - inc_width) / image_width) * image_height)
-    if mode == "nomal":
+    if mode == "normal":
         height_max = 2/3
     else:
         height_max = 1/3
@@ -130,7 +130,7 @@ def _create_content_list(scene_index, header_content, commonX, header_pasteY, te
         return content_list
 
 def _change_content_list(content_list, scene, header_font, header_content, sub_pic, mode, display_height, base_line_coord, padding):
-        if mode == "nomal":
+        if mode == "normal":
             if sub_pic != None:
                 sub_sizeY = sub_pic.size[1]
                 if scene.text != '' :
@@ -152,11 +152,11 @@ def _decide_sub_paste_coord(pics, display_width, display_height,base_line_coord,
     if pics["sub"] != None:
         sub_picX, sub_picY = pics["sub"].size
         X = (display_width-inc_width-sub_picX) 
-        if mode == "nomal":
+        if mode == "normal":
             Y = int((display_height * 2/3 - sub_picY) // 2)
         else:
             Y = int((base_line_coord - sub_picY))
-        if text =='' and mode == "nomal":
+        if text =='' and mode == "normal":
             Y = (display_height - sub_picY) // 2
         sub_paste_coord = [X//2, Y]
     return sub_paste_coord
